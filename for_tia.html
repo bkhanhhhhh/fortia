@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tia's Birthday</title>
+    <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><text x="50%" y="50%" font-size="48" text-anchor="middle" dominant-baseline="central">🎂</text></svg>'>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Lexend', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            cursor: none;
+        }
+        
+        /* Background và các phần tử trang trí chung cho tất cả các trang */
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), #0A2353, #112C71, #56E1E9, #5B58EB, #BB63FF);
+            background-size: 300% 300%;
+            z-index: -1;
+            transition: all 0.5s ease;
+        }
+        
+        .decorative-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+        
+        .circle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            animation: float 15s infinite ease-in-out;
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+            }
+            25% {
+                transform: translateY(-20px) translateX(10px);
+            }
+            50% {
+                transform: translateY(10px) translateX(-10px);
+            }
+            75% {
+                transform: translateY(-10px) translateX(20px);
+            }
+        }
+        
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: particleFloat 20s infinite linear;
+        }
+        
+        @keyframes particleFloat {
+            0% {
+                transform: translateY(100vh) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-10vh) translateX(100px);
+                opacity: 0;
+            }
+        }
+        
+        /* Con trỏ trái tim chung cho tất cả các trang */
+        .cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            pointer-events: none;
+            z-index: 99999;
+            transform: translate(-50%, -50%);
+        }
+        
+        .cursor-heart {
+            position: relative;
+            width: 20px;
+            height: 20px;
+            transform: rotate(-45deg);
+            animation: heartbeat 1.5s infinite;
+        }
+        
+        .cursor-heart:before,
+        .cursor-heart:after {
+            content: '';
+            width: 12px;
+            height: 18px;
+            position: absolute;
+            left: 10px;
+            top: 0;
+            background: #ff69b4;
+            border-radius: 10px 10px 0 0;
+            transform: rotate(-45deg);
+            transform-origin: 0 100%;
+            box-shadow: 0 0 10px #ff69b4, 0 0 20px #ff69b4;
+        }
+        
+        .cursor-heart:after {
+            left: 0;
+            transform: rotate(45deg);
+            transform-origin: 100% 100%;
+        }
+        
+        @keyframes heartbeat {
+            0% { transform: rotate(-45deg) scale(1); }
+            25% { transform: rotate(-45deg) scale(1.1); }
+            50% { transform: rotate(-45deg) scale(1); }
+            75% { transform: rotate(-45deg) scale(1.1); }
+            100% { transform: rotate(-45deg) scale(1); }
+        }
+        
+        /* Hiệu ứng bling bling xung quanh trái tim */
+        .cursor-sparkle {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: white;
+            pointer-events: none;
+            z-index: 99998;
+            opacity: 0;
+            animation: sparkle 1.5s infinite;
+        }
+        
+        @keyframes sparkle {
+            0% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0); }
+        }
+        
+        .cursor-follower {
+            position: fixed;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 105, 180, 0.1);
+            pointer-events: none;
+            z-index: 99997;
+            transition: transform 0.3s ease;
+            transform: translate(-50%, -50%);
+        }
+        
+        /* Trang chờ */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1.5s ease-out;
+        }
+        
+        .splash-content {
+            text-align: center;
+            color: white;
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        
+        .birthday-message {
+            font-size: 2.5rem;
+            font-weight: 700;
+            opacity: 0;
+            transform: scale(0.5) rotate(-10deg);
+            transition: all 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+            margin-bottom: 30px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .birthday-message.show {
+            opacity: 1;
+            transform: scale(1) rotate(0deg);
+            animation: textGlow 2s infinite alternate, textFloat 3s ease-in-out infinite;
+        }
+        
+        @keyframes textGlow {
+            0% {
+                text-shadow: 0 0 15px rgba(255, 255, 255, 0.5), 0 0 20px rgba(255, 105, 180, 0.3);
+            }
+            100% {
+                text-shadow: 0 0 25px rgba(255, 255, 255, 0.8), 0 0 35px rgba(255, 105, 180, 0.6), 0 0 45px rgba(187, 88, 255, 0.4);
+            }
+        }
+        
+        @keyframes textFloat {
+            0%, 100% {
+                transform: translateY(0) scale(1);
+            }
+            50% {
+                transform: translateY(-10px) scale(1.02);
+            }
+        }
+        
+        /* Hiệu ứng bling bling xung quanh chữ */
+        .text-sparkle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: white;
+            opacity: 0;
+            z-index: 1;
+        }
+        
+        .text-sparkle.active {
+            animation: sparkleBurst 1.5s ease-out forwards;
+        }
+        
+        @keyframes sparkleBurst {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1);
+                opacity: 1;
+                box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.8);
+            }
+            100% {
+                transform: scale(0);
+                opacity: 0;
+            }
+        }
+        
+        /* Kèn bung bông */
+        .party-horn {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto;
+            opacity: 0;
+            transform: scale(0) translateY(50px);
+            transition: all 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.5s;
+        }
+        
+        .party-horn.show {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            animation: hornShake 0.5s ease-in-out infinite alternate;
+        }
+        
+        @keyframes hornShake {
+            0% { transform: scale(1) translateY(0) rotate(-5deg); }
+            100% { transform: scale(1) translateY(0) rotate(5deg); }
+        }
+        
+        .horn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 80px;
+            z-index: 2;
+        }
+        
+        /* Hiệu ứng bung bông từ kèn */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ff69b4;
+            opacity: 0;
+            z-index: 1;
+        }
+        
+        .confetti.active {
+            animation: confettiFly 1.5s ease-out forwards;
+        }
+        
+        @keyframes confettiFly {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        /* Hiệu ứng ngôi sao */
+        .star {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0;
+            z-index: 3;
+        }
+        
+        .star.active {
+            animation: starSparkle 1.5s ease-out forwards;
+        }
+        
+        @keyframes starSparkle {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1);
+                opacity: 1;
+                box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.8);
+            }
+            100% {
+                transform: scale(0);
+                opacity: 0;
+            }
+        }
+        
+        /* Trang chính */
+        .main-content {
+            opacity: 0;
+            transition: opacity 1.5s ease-in;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .main-content.hidden {
+            opacity: 0 !important;
+            pointer-events: none;
+            visibility: hidden;
+        }
+        
+        .content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .gift-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .gift-image {
+            width: 300px;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+        
+        .gift-image:hover {
+            transform: scale(1.02);
+        }
+        
+        .gift-text {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 40px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            line-height: 1.6;
+        }
+        
+        .bear-button {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 105, 180, 0.2);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+        
+        .bear-button:hover {
+            background: rgba(255, 105, 180, 0.4);
+            transform: scale(1.1);
+        }
+        
+        .bear-button:active {
+            transform: scale(0.95);
+        }
+        
+        .bear-emoji {
+            font-size: 30px;
+        }
+        
+        /* Trang kế tiếp */
+        .next-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 20000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease;
+            overflow: auto;
+        }
+        
+        .next-page.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .next-content {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
+        }
+        
+        .content-wrapper {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        
+        .text-section {
+            flex: 0 0 55%;
+            padding-right: 30px;
+        }
+        
+        .image-section {
+            flex: 0 0 45%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .next-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            text-align: center;
+        }
+        
+        .typing-text {
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            line-height: 1.6;
+            text-align: center;
+            margin-bottom: 20px;
+            color: white;
+        }
+        
+        .typing-cursor {
+            display: inline-block;
+            width: 3px;
+            height: 1.2em;
+            background-color: white;
+            animation: blink 1s infinite;
+            vertical-align: text-bottom;
+            margin-left: 2px;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        .gift-image-large {
+            max-width: 100%;
+            max-height: 500px;
+            object-fit: cover;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+        
+        .gift-image-large:hover {
+            transform: scale(1.02);
+        }
+        
+        .back-button {
+            margin-top: 20px;
+            padding: 12px 25px;
+            background: rgba(255, 105, 180, 0.2);
+            border: 2px solid #ff69b4;
+            border-radius: 30px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            align-self: center;
+        }
+        
+        .back-button:hover {
+            background: rgba(255, 105, 180, 0.4);
+            transform: scale(1.05);
+        }
+        
+        /* Nút con rái cá */
+        .otter-button {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 60px;
+            height: 60px;
+            background: rgba(86, 225, 233, 0.2);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+        
+        .otter-button:hover {
+            background: rgba(86, 225, 233, 0.4);
+            transform: scale(1.1);
+        }
+        
+        .otter-button:active {
+            transform: scale(0.95);
+        }
+        
+        .otter-emoji {
+            font-size: 30px;
+        }
+        
+        /* Trang thứ 3 */
+        .third-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 30000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease;
+            overflow: auto;
+        }
+        
+        .third-page.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .third-content {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
+        }
+        
+        .third-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            text-align: center;
+            color: white;
+        }
+        
+        .third-text {
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            line-height: 1.6;
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+        
+        .third-image {
+            max-width: 100%;
+            max-height: 500px;
+            object-fit: cover;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+            margin: 0 auto 30px;
+            display: block;
+        }
+        
+        .third-image:hover {
+            transform: scale(1.02);
+        }
+        
+        .back-to-second-button {
+            margin-top: 20px;
+            padding: 12px 25px;
+            background: rgba(86, 225, 233, 0.2);
+            border: 2px solid #56E1E9;
+            border-radius: 30px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            align-self: center;
+        }
+        
+        .back-to-second-button:hover {
+            background: rgba(86, 225, 233, 0.4);
+            transform: scale(1.05);
+        }
+        
+        /* Cập nhật bố cục cho trang thứ 3 */
+        .third-content-wrapper {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        
+        .third-image-section {
+            flex: 0 0 45%;
+            padding-right: 30px;
+        }
+        
+        .third-text-section {
+            flex: 0 0 55%;
+        }
+        
+        .third-typing-text {
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            line-height: 1.6;
+            text-align: center;
+            margin-bottom: 20px;
+            color: white;
+        }
+        
+        /* Nút gấu Bắc Cực */
+        .polar-bear-button {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 60px;
+            height: 60px;
+            background: rgba(173, 216, 230, 0.2);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+        
+        .polar-bear-button:hover {
+            background: rgba(173, 216, 230, 0.4);
+            transform: scale(1.1);
+        }
+        
+        .polar-bear-button:active {
+            transform: scale(0.95);
+        }
+        
+        .polar-bear-emoji {
+            font-size: 30px;
+        }
+        
+        /* Trang thứ 4 */
+        .fourth-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 40000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease;
+            overflow: auto;
+        }
+        
+        .fourth-page.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .fourth-content {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
+        }
+        
+        .fourth-content-wrapper {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        
+        .fourth-text-section {
+            flex: 0 0 55%;
+            padding-right: 30px;
+        }
+        
+        .fourth-image-section {
+            flex: 0 0 45%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .fourth-typing-text {
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            line-height: 1.6;
+            text-align: center;
+            margin-bottom: 20px;
+            color: white;
+        }
+        
+        .back-to-third-button {
+            margin-top: 20px;
+            padding: 12px 25px;
+            background: rgba(173, 216, 230, 0.2);
+            border: 2px solid #ADD8E6;
+            border-radius: 30px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            align-self: center;
+        }
+        
+        .back-to-third-button:hover {
+            background: rgba(173, 216, 230, 0.4);
+            transform: scale(1.05);
+        }
+        
+        /* Nút con gà */
+        .chick-button {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 0, 0.2);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+        
+        .chick-button:hover {
+            background: rgba(255, 255, 0, 0.4);
+            transform: scale(1.1);
+        }
+        
+        .chick-button:active {
+            transform: scale(0.95);
+        }
+        
+        .chick-emoji {
+            font-size: 30px;
+        }
+        
+        /* Trang thứ 5 */
+        .fifth-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 50000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease;
+            overflow: auto;
+        }
+        
+        .fifth-page.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .fifth-content {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+        
+        .fifth-message {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+            text-align: center;
+            color: white;
+            opacity: 0;
+            transition: opacity 1s ease;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+        }
+        
+        .fifth-message.show {
+            opacity: 1;
+        }
+        
+        .fifth-message.hide {
+            opacity: 0;
+        }
+        
+        .video-container {
+            width: 80%;
+            max-width: 800px;
+            opacity: 0;
+            transition: opacity 1s ease;
+            margin-top: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .video-container.show {
+            opacity: 1;
+        }
+        
+        .video-container iframe {
+            width: 100%;
+            height: 450px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: none;
+        }
+        
+        .back-to-fourth-button {
+            margin-top: 20px;
+            padding: 12px 25px;
+            background: rgba(173, 216, 230, 0.2);
+            border: 2px solid #ADD8E6;
+            border-radius: 30px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            align-self: center;
+        }
+        
+        .back-to-fourth-button:hover {
+            background: rgba(173, 216, 230, 0.4);
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <!-- Background và các phần tử trang trí chung -->
+    <div class="background"></div>
+    
+    <div class="decorative-elements">
+        <div class="circle" style="width: 80px; height: 80px; top: 10%; left: 10%;"></div>
+        <div class="circle" style="width: 120px; height: 120px; top: 70%; left: 80%;"></div>
+        <div class="circle" style="width: 60px; height: 60px; top: 40%; left: 70%;"></div>
+        <div class="circle" style="width: 100px; height: 100px; top: 80%; left: 20%;"></div>
+    </div>
+    
+    <div class="particles" id="particles"></div>
+    
+    <!-- Con trỏ trái tim chung -->
+    <div class="cursor" id="cursor">
+        <div class="cursor-heart"></div>
+    </div>
+    <div class="cursor-follower" id="cursor-follower"></div>
+    
+    <!-- Trang chờ -->
+    <div class="splash-screen" id="splashScreen">
+        <div class="splash-content">
+            <h2 class="birthday-message" id="birthdayMessage">Happy birthday to you, my babyyy 🐣</h2>
+            <div class="party-horn" id="partyHorn">
+                <div class="horn">🎉</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Trang chính -->
+    <div class="main-content" id="mainContent">
+        <div class="content">
+            <div class="gift-container">
+                <img src="her pic/first.JPG" alt="Birthday Gift" class="gift-image">
+                <div class="gift-text">
+                    Hehee xin chào cục zàng của BK<br>
+                    BK có món quà nhỏ muốn tặng cho em nè 🪄<br>
+                    Click vô con gấu đi babyyy
+                </div>
+            </div>
+        </div>
+        
+        <div class="bear-button" id="bearButton">
+            <span class="bear-emoji">🐻</span>
+        </div>
+    </div>
+    
+    <!-- Trang thứ 2 -->
+    <div class="next-page" id="nextPage">
+        <div class="next-content">
+            <div class="content-wrapper">
+                <div class="text-section">
+                    <div class="typing-text" id="typingText">
+                        <span class="typing-cursor"></span>
+                    </div>
+                </div>
+                <div class="image-section">
+                    <img src="her pic/xinh_quá.jpg" alt="Birthday Gift" class="gift-image-large">
+                </div>
+            </div>
+            <button class="back-button" id="backButton">Quay lại</button>
+        </div>
+        
+        <!-- Nút con rái cá để chuyển sang trang thứ 3 -->
+        <div class="otter-button" id="otterButton">
+            <span class="otter-emoji">🦦</span>
+        </div>
+    </div>
+    
+    <!-- Trang thứ 3 -->
+    <div class="third-page" id="thirdPage">
+        <div class="third-content">
+            <div class="third-content-wrapper">
+                <div class="third-image-section">
+                    <img src="her pic/hồi_làm_bạn.jpg" alt="Special Memory" class="gift-image-large">
+                </div>
+                <div class="third-text-section">
+                    <div class="third-typing-text" id="thirdTypingText">
+                        <span class="typing-cursor"></span>
+                    </div>
+                </div>
+            </div>
+            <button class="back-to-second-button" id="backToSecondButton">Quay lại</button>
+        </div>
+        
+        <!-- Nút gấu Bắc Cực để chuyển sang trang thứ 4 -->
+        <div class="polar-bear-button" id="polarBearButton">
+            <span class="polar-bear-emoji">🐻‍❄️</span>
+        </div>
+    </div>
+    
+    <!-- Trang thứ 4 -->
+    <div class="fourth-page" id="fourthPage">
+        <div class="fourth-content">
+            <div class="fourth-content-wrapper">
+                <div class="fourth-text-section">
+                    <div class="fourth-typing-text" id="fourthTypingText">
+                        <span class="typing-cursor"></span>
+                    </div>
+                </div>
+                <div class="fourth-image-section">
+                    <img src="her pic/first_ptb.jpg" alt="Special Memory" class="gift-image-large">
+                </div>
+            </div>
+            <button class="back-to-third-button" id="backToThirdButton">Quay lại</button>
+        </div>
+        
+        <!-- Nút con gà để chuyển sang trang thứ 5 -->
+        <div class="chick-button" id="chickButton">
+            <span class="chick-emoji">🐣</span>
+        </div>
+    </div>
+    
+    <!-- Trang thứ 5 -->
+    <div class="fifth-page" id="fifthPage">
+        <div class="fifth-content">
+            <div class="fifth-message" id="fifthMessage">Đây rồi, mời em đón xem món quà đặc biệt này nheee 🎈</div>
+            <div class="video-container" id="videoContainer">
+                <iframe src="https://www.youtube.com/watch?v=vozvj7QmadM&list=RDvozvj7QmadM&start_radio=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+            <button class="back-to-fourth-button" id="backToFourthButton">Quay lại</button>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const splashScreen = document.getElementById('splashScreen');
+            const mainContent = document.getElementById('mainContent');
+            const nextPage = document.getElementById('nextPage');
+            const thirdPage = document.getElementById('thirdPage');
+            const fourthPage = document.getElementById('fourthPage');
+            const fifthPage = document.getElementById('fifthPage');
+            const birthdayMessage = document.getElementById('birthdayMessage');
+            const partyHorn = document.getElementById('partyHorn');
+            const bearButton = document.getElementById('bearButton');
+            const backButton = document.getElementById('backButton');
+            const otterButton = document.getElementById('otterButton');
+            const backToSecondButton = document.getElementById('backToSecondButton');
+            const polarBearButton = document.getElementById('polarBearButton');
+            const backToThirdButton = document.getElementById('backToThirdButton');
+            const chickButton = document.getElementById('chickButton');
+            const backToFourthButton = document.getElementById('backToFourthButton');
+            const fifthMessage = document.getElementById('fifthMessage');
+            const videoContainer = document.getElementById('videoContainer');
+            const background = document.querySelector('.background');
+            const cursor = document.getElementById('cursor');
+            const cursorFollower = document.getElementById('cursor-follower');
+            const particlesContainer = document.getElementById('particles');
+            const typingText = document.getElementById('typingText');
+            const thirdTypingText = document.getElementById('thirdTypingText');
+            const fourthTypingText = document.getElementById('fourthTypingText');
+            
+            // Tạo particles
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+                particlesContainer.appendChild(particle);
+            }
+            
+            // Tạo các hiệu ứng bling bling
+            const sparkles = [];
+            for (let i = 0; i < 8; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.classList.add('cursor-sparkle');
+                document.body.appendChild(sparkle);
+                sparkles.push(sparkle);
+            }
+            
+            // Tạo hiệu ứng bling bling xung quanh chữ
+            function createTextSparkles() {
+                const messageRect = birthdayMessage.getBoundingClientRect();
+                
+                for (let i = 0; i < 20; i++) {
+                    const sparkle = document.createElement('div');
+                    sparkle.classList.add('text-sparkle');
+                    
+                    // Vị trí ngẫu nhiên xung quanh dòng chữ
+                    const x = messageRect.left + Math.random() * messageRect.width;
+                    const y = messageRect.top + Math.random() * messageRect.height;
+                    
+                    sparkle.style.left = x + 'px';
+                    sparkle.style.top = y + 'px';
+                    
+                    // Màu ngẫu nhiên
+                    const colors = ['#ffffff', '#ff69b4', '#56E1E9', '#BB63FF', '#FFD700'];
+                    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                    sparkle.style.background = randomColor;
+                    
+                    document.body.appendChild(sparkle);
+                    
+                    // Kích hoạt animation với độ trễ ngẫu nhiên
+                    setTimeout(() => {
+                        sparkle.classList.add('active');
+                    }, Math.random() * 1000);
+                    
+                    // Xóa sparkle sau khi animation kết thúc
+                    setTimeout(() => {
+                        sparkle.remove();
+                    }, 2500);
+                }
+            }
+            
+            // Tạo hiệu ứng ngôi sao
+            function createStars() {
+                const messageRect = birthdayMessage.getBoundingClientRect();
+                const messageCenterX = messageRect.left + messageRect.width / 2;
+                const messageCenterY = messageRect.top + messageRect.height / 2;
+                
+                for (let i = 0; i < 30; i++) {
+                    const star = document.createElement('div');
+                    star.classList.add('star');
+                    
+                    // Vị trí ngẫu nhiên xung quanh dòng chữ
+                    const angle = Math.random() * Math.PI * 2;
+                    const distance = 50 + Math.random() * 150;
+                    const x = messageCenterX + Math.cos(angle) * distance;
+                    const y = messageCenterY + Math.sin(angle) * distance;
+                    
+                    star.style.left = x + 'px';
+                    star.style.top = y + 'px';
+                    
+                    // Màu ngẫu nhiên
+                    const colors = ['#ffffff', '#ff69b4', '#56E1E9', '#BB63FF', '#FFD700'];
+                    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                    star.style.background = randomColor;
+                    
+                    document.body.appendChild(star);
+                    
+                    // Kích hoạt animation với độ trễ ngẫu nhiên
+                    setTimeout(() => {
+                        star.classList.add('active');
+                    }, Math.random() * 1000);
+                    
+                    // Xóa ngôi sao sau khi animation kết thúc
+                    setTimeout(() => {
+                        star.remove();
+                    }, 2500);
+                }
+            }
+            
+            // Tạo hiệu ứng bung bông từ kèn
+            function createConfetti() {
+                const hornRect = partyHorn.getBoundingClientRect();
+                const hornCenterX = hornRect.left + hornRect.width / 2;
+                const hornCenterY = hornRect.top + hornRect.height / 2;
+                
+                for (let i = 0; i < 50; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.classList.add('confetti');
+                    
+                    // Vị trí ban đầu là trung tâm của kèn
+                    confetti.style.left = hornCenterX + 'px';
+                    confetti.style.top = hornCenterY + 'px';
+                    
+                    // Màu ngẫu nhiên
+                    const colors = ['#ff69b4', '#56E1E9', '#BB63FF', '#FFD700', '#ff80bf'];
+                    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.background = randomColor;
+                    
+                    // Định hướng ngẫu nhiên
+                    const angle = Math.random() * Math.PI * 2;
+                    const distance = 100 + Math.random() * 200;
+                    const tx = Math.cos(angle) * distance;
+                    const ty = Math.sin(angle) * distance - 100; // Bay lên trên
+                    
+                    confetti.style.setProperty('--tx', tx + 'px');
+                    confetti.style.setProperty('--ty', ty + 'px');
+                    
+                    document.body.appendChild(confetti);
+                    
+                    // Kích hoạt animation với độ trễ ngẫu nhiên
+                    setTimeout(() => {
+                        confetti.classList.add('active');
+                    }, Math.random() * 500);
+                    
+                    // Xóa confetti sau khi animation kết thúc
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 2000);
+                }
+            }
+            
+            // Hiển thị dòng chữ và kèn
+            function showBirthdayMessage() {
+                // Hiển thị dòng chữ
+                birthdayMessage.classList.add('show');
+                
+                // Tạo hiệu ứng bling bling xung quanh chữ
+                createTextSparkles();
+                
+                // Hiển thị kèn sau khi dòng chữ xuất hiện
+                setTimeout(() => {
+                    partyHorn.classList.add('show');
+                    
+                    // Tạo hiệu ứng bung bông
+                    createConfetti();
+                    
+                    // Tạo hiệu ứng ngôi sao
+                    createStars();
+                    
+                    // Lặp lại hiệu ứng bung bông và ngôi sao
+                    const effectsInterval = setInterval(() => {
+                        createConfetti();
+                        createStars();
+                        createTextSparkles();
+                    }, 1500);
+                    
+                    // Dừng tạo hiệu ứng sau 3 giây
+                    setTimeout(() => {
+                        clearInterval(effectsInterval);
+                    }, 3000);
+                }, 500);
+            }
+            
+            // Bắt đầu hiển thị sau khi trang được tải
+            setTimeout(() => {
+                showBirthdayMessage();
+            }, 500);
+            
+            // Vị trí hiện tại của gradient
+            let currentX = 50;
+            let currentY = 50;
+            
+            // Vị trí mục tiêu (vị trí chuột)
+            let targetX = 50;
+            let targetY = 50;
+            
+            // Tốc độ di chuyển của gradient (càng nhỏ càng mượt)
+            const speed = 0.001;
+            
+            // Tự động di chuyển gradient
+            let autoMoveX = 0;
+            let autoMoveY = 0;
+            
+            // Ẩn trang chờ và hiển thị trang chính sau 4 giây
+            setTimeout(() => {
+                splashScreen.style.opacity = '0';
+                mainContent.style.opacity = '1';
+                
+                // Xóa trang chờ sau khi mờ dần
+                setTimeout(() => {
+                    splashScreen.style.display = 'none';
+                }, 1500);
+            }, 4000);
+            
+            // Xử lý sự kiện click vào nút gấu
+            bearButton.addEventListener('click', function() {
+                // Ẩn trang chính
+                mainContent.classList.add('hidden');
+                
+                // Hiển thị trang kế tiếp với hiệu ứng mượt mà
+                nextPage.classList.add('active');
+                
+                // Bắt đầu hiệu ứng typing
+                startTypingEffect();
+            });
+            
+            // Xử lý sự kiện click vào nút quay lại (từ trang 2 về trang 1)
+            backButton.addEventListener('click', function() {
+                // Ẩn trang kế tiếp
+                nextPage.classList.remove('active');
+                
+                // Hiển thị lại trang chính
+                setTimeout(() => {
+                    mainContent.classList.remove('hidden');
+                }, 300);
+                
+                // Reset lại văn bản typing
+                setTimeout(() => {
+                    typingText.innerHTML = '<span class="typing-cursor"></span>';
+                }, 500);
+            });
+            
+            // Xử lý sự kiện click vào nút con rái cá (từ trang 2 sang trang 3)
+            otterButton.addEventListener('click', function() {
+                // Ẩn trang kế tiếp
+                nextPage.classList.remove('active');
+                
+                // Hiển thị trang thứ 3 với hiệu ứng mượt mà
+                setTimeout(() => {
+                    thirdPage.classList.add('active');
+                    // Bắt đầu hiệu ứng typing cho trang thứ 3
+                    startThirdTypingEffect();
+                }, 300);
+            });
+            
+            // Xử lý sự kiện click vào nút quay lại (từ trang 3 về trang 2)
+            backToSecondButton.addEventListener('click', function() {
+                // Ẩn trang thứ 3
+                thirdPage.classList.remove('active');
+                
+                // Reset lại văn bản typing cho trang thứ 3
+                setTimeout(() => {
+                    thirdTypingText.innerHTML = '<span class="typing-cursor"></span>';
+                }, 300);
+                
+                // Hiển thị lại trang kế tiếp
+                setTimeout(() => {
+                    nextPage.classList.add('active');
+                }, 300);
+            });
+            
+            // Xử lý sự kiện click vào nút gấu Bắc Cực (từ trang 3 sang trang 4)
+            polarBearButton.addEventListener('click', function() {
+                // Ẩn trang thứ 3
+                thirdPage.classList.remove('active');
+                
+                // Hiển thị trang thứ 4 với hiệu ứng mượt mà
+                setTimeout(() => {
+                    fourthPage.classList.add('active');
+                    // Bắt đầu hiệu ứng typing cho trang thứ 4
+                    startFourthTypingEffect();
+                }, 300);
+            });
+            
+            // Xử lý sự kiện click vào nút quay lại (từ trang 4 về trang 3)
+            backToThirdButton.addEventListener('click', function() {
+                // Ẩn trang thứ 4
+                fourthPage.classList.remove('active');
+                
+                // Reset lại văn bản typing cho trang thứ 4
+                setTimeout(() => {
+                    fourthTypingText.innerHTML = '<span class="typing-cursor"></span>';
+                }, 300);
+                
+                // Hiển thị lại trang thứ 3
+                setTimeout(() => {
+                    thirdPage.classList.add('active');
+                }, 300);
+            });
+            
+            // Xử lý sự kiện click vào nút con gà (từ trang 4 sang trang 5)
+            chickButton.addEventListener('click', function() {
+                // Ẩn trang thứ 4
+                fourthPage.classList.remove('active');
+                
+                // Hiển thị trang thứ 5 với hiệu ứng mượt mà
+                setTimeout(() => {
+                    fifthPage.classList.add('active');
+                    // Bắt đầu hiệu ứng hiển thị thông điệp và video
+                    showFifthPageContent();
+                }, 300);
+            });
+            
+            // Xử lý sự kiện click vào nút quay lại (từ trang 5 về trang 4)
+            backToFourthButton.addEventListener('click', function() {
+                // Ẩn trang thứ 5
+                fifthPage.classList.remove('active');
+                
+                // Reset lại nội dung trang thứ 5
+                setTimeout(() => {
+                    fifthMessage.classList.remove('show', 'hide');
+                    videoContainer.classList.remove('show');
+                }, 300);
+                
+                // Hiển thị lại trang thứ 4
+                setTimeout(() => {
+                    fourthPage.classList.add('active');
+                }, 300);
+            });
+            
+            // Hiệu ứng typing cho đoạn văn bản trang 2
+            function startTypingEffect() {
+                // Xóa nội dung cũ và giữ lại con trỏ
+                typingText.innerHTML = '<span class="typing-cursor"></span>';
+                const cursor = typingText.querySelector('.typing-cursor');
+                
+                // Tạo một span để chứa nội dung
+                const contentSpan = document.createElement('span');
+                typingText.insertBefore(contentSpan, cursor);
+                
+                // Định dạng văn bản với các dòng xuống line-height
+                const message = `Đầu tiên thì BK muốn gửi lời chúc đặc biệt nhất dành cho em iu nháaa 🌹 chúc em bước sang cánh cửa mới này thật tự hào nè, những ước mơ, những dự định, những điều em mong muốn sẽ luôn thành hiện thực, mọi sự may mắn trên đời này sẽ đến với một người tuyệt vời như em ✨ dù tương lai sẽ có nhiều khó khăn bấp bênh nhưng em cũng đừng do dự nhá, BK tin em sẽ làm được hếttt, và cũng không được quên là phải hạnh phúc, trân trọng những điều mà mình đón nhận nhe, BK sẽ cố gắng thật nhiều để bên em thật lâu. Nên là chúc baby tất cả mọi thứ tốt đẹp nhất sẽ đến với em, love you so much babyyy ❤️‍🔥`;
+                
+                let index = 0;
+                
+                function type() {
+                    if (index < message.length) {
+                        // Thêm ký tự tiếp theo
+                        contentSpan.textContent += message.charAt(index);
+                        index++;
+                        
+                        // Tốc độ gõ (có thể điều chỉnh)
+                        const typingSpeed = 50; // ms cho mỗi ký tự
+                        
+                        setTimeout(type, typingSpeed);
+                    }
+                }
+                
+                // Bắt đầu hiệu ứng typing sau một khoảng trễ nhỏ
+                setTimeout(type, 300);
+            }
+            
+            // Hiệu ứng typing cho đoạn văn bản trang 3
+            function startThirdTypingEffect() {
+                // Xóa nội dung cũ và giữ lại con trỏ
+                thirdTypingText.innerHTML = '<span class="typing-cursor"></span>';
+                const cursor = thirdTypingText.querySelector('.typing-cursor');
+                
+                // Tạo một span để chứa nội dung
+                const contentSpan = document.createElement('span');
+                thirdTypingText.insertBefore(contentSpan, cursor);
+                
+                // Định dạng văn bản với các dòng xuống line-height
+                const message = `Hồi mình còn làm bạn đây này =)))) tấm hình huyền thoại quá, kể cả hồi này vui thiệt sự í, hong hiểu sao lại thân như thế cơ, ngày nào cũng thấy nhau đèo nhau đi mua dừa tắc, rảnh nữa là ra công viên quánh cầu lông 🏸 lúc đó thì chưa bao giờ nghĩ là mình thích em rùi, để một mình em thầm thích tận 2 năm hơn luôn shibaaaa. Tới giờ vẫn muốn cảm ơn cục zàng nhiều vì khoảng thời gian đó, nhiều lúc BK nghĩ khoảng thời gian đó của BK mà hong có em chắc sẽ buồn lắm í, cảm ơn em đã âm thầm iu thương lo lắng cho Báo Khanh hồi đó nhé hehee 💝`;
+                
+                let index = 0;
+                
+                function type() {
+                    if (index < message.length) {
+                        // Thêm ký tự tiếp theo
+                        contentSpan.textContent += message.charAt(index);
+                        index++;
+                        
+                        // Tốc độ gõ (có thể điều chỉnh)
+                        const typingSpeed = 50; // ms cho mỗi ký tự
+                        
+                        setTimeout(type, typingSpeed);
+                    }
+                }
+                
+                // Bắt đầu hiệu ứng typing sau một khoảng trễ nhỏ
+                setTimeout(type, 300);
+            }
+            
+            // Hiệu ứng typing cho đoạn văn bản trang 4
+            function startFourthTypingEffect() {
+                // Xóa nội dung cũ và giữ lại con trỏ
+                fourthTypingText.innerHTML = '<span class="typing-cursor"></span>';
+                const cursor = fourthTypingText.querySelector('.typing-cursor');
+                
+                // Tạo một span để chứa nội dung
+                const contentSpan = document.createElement('span');
+                fourthTypingText.insertBefore(contentSpan, cursor);
+                
+                // Định dạng văn bản với các dòng xuống line-height
+                const message = `Một lần nữa cảm ơn em thiệt nhiều vì đã chờ đợi BK lâu đến như thế, lúc mà nghe được rằng em định từ bỏ sự đơn phương này đi thì BK lại xuất hiện và đánh úp em một phen phải gọi là bất ngờ nhất cuộc đời nhỉ =))) hy vọng đây sẽ là điều em không bao giờ hối hận và BK sẽ cố gắng khiến điều đó sẽ là điều hạnh phúc nhất dành cho em nháaa 💗 BK cũng không dám hứa nhiều nhưng mà em sẽ luôn là nguồn động lực để BK cố gắng nhiều hơn giúp cho tương lai tụi mình thật là đẹp nhá, hy vọng chuyện tình này dù có gặp khó khăn gì tụi mình vẫn sẽ luôn tìm cách vượt qua, cùng vun đắp cho chuyện tình mình nở hoa dài dài nha cục zàng hehee. Cảm ơn em yêu nhiều lắm lắm moa moaaa 💖`;
+                
+                let index = 0;
+                
+                function type() {
+                    if (index < message.length) {
+                        // Thêm ký tự tiếp theo
+                        contentSpan.textContent += message.charAt(index);
+                        index++;
+                        
+                        // Tốc độ gõ (có thể điều chỉnh)
+                        const typingSpeed = 50; // ms cho mỗi ký tự
+                        
+                        setTimeout(type, typingSpeed);
+                    }
+                }
+                
+                // Bắt đầu hiệu ứng typing sau một khoảng trễ nhỏ
+                setTimeout(type, 300);
+            }
+            
+            // Hiệu ứng hiển thị nội dung trang thứ 5
+            function showFifthPageContent() {
+                // Hiển thị thông điệp
+                fifthMessage.classList.add('show');
+                
+                // Sau 3 giây, ẩn thông điệp và hiển thị video
+                setTimeout(() => {
+                    fifthMessage.classList.add('hide');
+                    
+                    // Hiển thị video sau khi thông điệp biến mất
+                    setTimeout(() => {
+                        videoContainer.classList.add('show');
+                    }, 1000);
+                }, 3000);
+            }
+            
+            document.addEventListener('mousemove', function(e) {
+                // Lấy tọa độ chuột
+                const x = e.clientX;
+                const y = e.clientY;
+                
+                // Cập nhật vị trí con trỏ tùy chỉnh
+                cursor.style.left = x + 'px';
+                cursor.style.top = y + 'px';
+                
+                cursorFollower.style.left = x + 'px';
+                cursorFollower.style.top = y + 'px';
+                
+                // Cập nhật vị trí các hiệu ứng bling bling
+                const angleStep = (Math.PI * 2) / sparkles.length;
+                const radius = 20;
+                const time = Date.now() / 1000;
+                
+                sparkles.forEach((sparkle, i) => {
+                    const angle = angleStep * i + time;
+                    const distance = radius + Math.sin(time * 2 + i) * 5;
+                    const sparkleX = x + Math.cos(angle) * distance;
+                    const sparkleY = y + Math.sin(angle) * distance;
+                    
+                    sparkle.style.left = sparkleX + 'px';
+                    sparkle.style.top = sparkleY + 'px';
+                    sparkle.style.animationDelay = (i * 0.2) + 's';
+                });
+                
+                // Cập nhật vị trí mục tiêu
+                targetX = (x / window.innerWidth) * 100;
+                targetY = (y / window.innerHeight) * 100;
+            });
+            
+            // Thêm hiệu ứng khi click
+            document.addEventListener('click', function(e) {
+                // Nếu click không phải vào các nút
+                if (e.target !== bearButton && e.target !== backButton && 
+                    e.target !== otterButton && e.target !== backToSecondButton &&
+                    e.target !== polarBearButton && e.target !== backToThirdButton &&
+                    e.target !== chickButton && e.target !== backToFourthButton &&
+                    e.target !== bearButton.querySelector('.bear-emoji') && 
+                    e.target !== backButton &&
+                    e.target !== otterButton.querySelector('.otter-emoji') &&
+                    e.target !== backToSecondButton &&
+                    e.target !== polarBearButton.querySelector('.polar-bear-emoji') &&
+                    e.target !== backToThirdButton &&
+                    e.target !== chickButton.querySelector('.chick-emoji') &&
+                    e.target !== backToFourthButton) {
+                    cursor.style.transform = 'translate(-50%, -50%) scale(1.5)';
+                    cursorFollower.style.transform = 'translate(-50%, -50%) scale(1.5)';
+                    
+                    // Tạo hiệu ứng của các điểm sáng
+                    for (let i = 0; i < 12; i++) {
+                        const explosionSparkle = document.createElement('div');
+                        explosionSparkle.classList.add('cursor-sparkle');
+                        explosionSparkle.style.left = cursor.style.left;
+                        explosionSparkle.style.top = cursor.style.top;
+                        explosionSparkle.style.background = '#ff69b4';
+                        explosionSparkle.style.boxShadow = '0 0 10px #ff69b4';
+                        document.body.appendChild(explosionSparkle);
+                        
+                        const angle = (Math.PI * 2 * i) / 12;
+                        const distance = 50 + Math.random() * 50;
+                        const duration = 500 + Math.random() * 500;
+                        
+                        explosionSparkle.animate([
+                            { transform: 'translate(0, 0) scale(0)', opacity: 1 },
+                            { transform: `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px) scale(1)`, opacity: 0 }
+                        ], {
+                            duration: duration,
+                            easing: 'ease-out'
+                        }).onfinish = () => explosionSparkle.remove();
+                    }
+                    
+                    setTimeout(() => {
+                        cursor.style.transform = 'translate(-50%, -50%) scale(1)';
+                        cursorFollower.style.transform = 'translate(-50%, -50%) scale(1)';
+                    }, 300);
+                }
+            });
+            
+            // Animation loop để cập nhật gradient
+            function animateGradient() {
+                // Tự động di chuyển nhẹ nhàng
+                autoMoveX += 0.1;
+                autoMoveY += 0.05;
+                
+                // Tính toán vị trí tự động (dạng sóng sin để tạo chuyển động tròn)
+                const autoX = Math.sin(autoMoveX * 0.01) * 10 + 50;
+                const autoY = Math.cos(autoMoveY * 0.01) * 10 + 50;
+                
+                // Kết hợp giữa di chuyển tự động và di chuyển theo chuột
+                // Khi chuột di chuyển, gradient sẽ từ từ dịch chuyển về phía chuột
+                currentX += (targetX - currentX) * speed;
+                currentY += (targetY - currentY) * speed;
+                
+                // Thêm một chút chuyển động tự động vào vị trí hiện tại
+                const finalX = currentX + (autoX - 50) * 0.2;
+                const finalY = currentY + (autoY - 50) * 0.2;
+                
+                // Cập nhật CSS variables
+                background.style.setProperty('--x', finalX + '%');
+                background.style.setProperty('--y', finalY + '%');
+                
+                // Tiếp tục animation
+                requestAnimationFrame(animateGradient);
+            }
+            
+            // Bắt đầu animation
+            animateGradient();
+        });
+    </script>
+</body>
+</html>
